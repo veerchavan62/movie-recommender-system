@@ -5,7 +5,7 @@ import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import NearestNeighbors
 
-# Helper to safely extract names from the dict strings
+
 def extract_names(obj, max_items=None):
     try:
         items = ast.literal_eval(obj)
@@ -16,7 +16,6 @@ def extract_names(obj, max_items=None):
     except (ValueError, SyntaxError, TypeError):
         return ""
 
-# Helper to extract the director specifically
 def extract_director(obj):
     try:
         for i in ast.literal_eval(obj):
@@ -36,12 +35,12 @@ def train():
     movies['genres'] = movies['genres'].apply(extract_names)
     movies['keywords'] = movies['keywords'].apply(extract_names)
     
-    # Extract top 3 cast members 
+     
     movies['cast'] = movies['cast'].apply(lambda x: extract_names(x, max_items=3))
     movies['director'] = movies['crew'].apply(extract_director)
     
     print("Building content tags...")
-    # Join everything cleanly into one single text block per movie
+  
     movies['tags'] = (
         movies['overview'].fillna('') + ' ' + 
         movies['genres'] + ' ' + 
@@ -53,7 +52,7 @@ def train():
     movies_clean = movies[['title', 'tags']].reset_index(drop=True)
 
     print("Vectorizing tags using TF-IDF...")
-    # TF-IDF penalizes very common words and highlight true unique combinations
+   
     tfidf = TfidfVectorizer(max_features=5000, stop_words='english')
     vectors = tfidf.fit_transform(movies_clean['tags']) # Keeps as sparse matrix
 
@@ -70,7 +69,7 @@ def train():
     with open('model/vectorizer.pkl', 'wb') as f:
         pickle.dump(tfidf, f)
         
-    # Save as pickle (loads much faster in Python) and CSV (for existing compatibility)
+   
     movies_clean.to_pickle('model/movies.pkl')
     movies_clean.to_csv('model/movies.csv', index=False)
 
